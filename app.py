@@ -403,4 +403,4 @@ with tab2:
 
         # DXY + US10Y metrics
         mc1, mc2 = st.columns(2)
-        
+'''
