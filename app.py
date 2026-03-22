@@ -13,19 +13,38 @@ st.markdown("""<style>
   h1{font-size:1.3rem!important;}
 </style>""", unsafe_allow_html=True)
 
-SYMBOL='BTC/USDT'; TIMEFRAMES=['15m','1h','4h','1d','1w']
+SYMBOL='BTC/USD'; TIMEFRAMES=['15m','1h','4h','1d','1w']
 CANDLES=300; FIB_DAYS=90; PROX_PCT=0.015
 
 @st.cache_data(ttl=300)
 def fetch_ohlcv():
-    exc=ccxt.bybit({'enableRateLimit':True}); data={}
+    EXCHANGES = [
+        ccxt.kraken({'enableRateLimit': True}),
+        ccxt.bitstamp({'enableRateLimit': True}),
+        ccxt.coinbase({'enableRateLimit': True}),
+    ]
+    PAIRS = ['BTC/USD', 'BTC/USD', 'BTC/USD']
+
+    data = {}
     for tf in TIMEFRAMES:
-        try:
-            raw=exc.fetch_ohlcv(SYMBOL,tf,limit=CANDLES)
-            df=pd.DataFrame(raw,columns=['ts','open','high','low','close','volume'])
-            df['ts']=pd.to_datetime(df['ts'],unit='ms',utc=True)
-            df.set_index('ts',inplace=True); data[tf]=df.astype(float)
-        except Exception as e: st.warning(f"OHLCV {tf}: {e}")
+        fetched = False
+        for exc, pair in zip(EXCHANGES, PAIRS):
+            try:
+                raw = exc.fetch_ohlcv(pair, tf, limit=CANDLES)
+                if raw and len(raw) > 10:
+                    df = pd.DataFrame(
+                        raw,
+                        columns=['ts','open','high','low','close','volume']
+                    )
+                    df['ts'] = pd.to_datetime(df['ts'], unit='ms', utc=True)
+                    df.set_index('ts', inplace=True)
+                    data[tf] = df.astype(float)
+                    fetched = True
+                    break
+            except Exception:
+                continue
+        if not fetched:
+            st.warning(f"All sources failed for {tf}")
     return data
 
 @st.cache_data(ttl=300)
