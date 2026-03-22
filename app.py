@@ -230,6 +230,14 @@ def build_block(data,fg_v,fg_c,fg_chg,btc_d,eth_d,der,macro):
     vol24=data['1h'].tail(24)['volume'].sum()*price/1e9
     fib=fib_lvls(data['1d']); pl=period_lvls(data)
     L_=[]; A=L_.append
+    
+    try:
+        with open("master_prompt.md", "r", encoding="utf-8") as f:
+            content = f.read().strip()
+            if content: A(content + "\n")
+    except Exception:
+        pass
+
     A("╔══════════════════════════════════════════════════════════╗")
     A(f"   BTC/USD EXPERT TA BLOCK v2  |  {now.strftime('%Y-%m-%d %H:%M UTC')}")
     A("╚══════════════════════════════════════════════════════════╝")
