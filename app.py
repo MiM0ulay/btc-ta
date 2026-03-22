@@ -18,7 +18,7 @@ CANDLES=300; FIB_DAYS=90; PROX_PCT=0.015
 
 @st.cache_data(ttl=300)
 def fetch_ohlcv():
-    exc=ccxt.binance({'enableRateLimit':True}); data={}
+    exc=ccxt.bybit({'enableRateLimit':True}); data={}
     for tf in TIMEFRAMES:
         try:
             raw=exc.fetch_ohlcv(SYMBOL,tf,limit=CANDLES)
